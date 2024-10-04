@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">HelloWorldActivity</string>
+    <string name="let_s_quit_the_activity">Quittons l\'activité</string>
+    <string name="quit">Quitter</string>
+    <string name="hello_world">Bonjour le monde !</string>
+</resources>
