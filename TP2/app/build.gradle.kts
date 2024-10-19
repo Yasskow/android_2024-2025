@@ -4,11 +4,11 @@ plugins {
 }
 
 android {
-    namespace = "com.example.goodcount"
+    namespace = "fr.uge.android.goodcount"
     compileSdk = 34
 
     defaultConfig {
-        applicationId = "com.example.goodcount"
+        applicationId = "fr.uge.android.goodcount"
         minSdk = 24
         targetSdk = 34
         versionCode = 1

@@ -1,4 +1,4 @@
-package com.example.goodcount
+package fr.uge.android.goodcount
 
 import org.junit.Test
 
