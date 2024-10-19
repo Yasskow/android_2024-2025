@@ -5,11 +5,12 @@ import android.view.View
 import android.widget.Button
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
+import com.example.goodcount.R
 import java.util.stream.IntStream
 import kotlin.random.Random
 
 class MainActivity : AppCompatActivity() {
-    val buttonArray = intArrayOf(R.id.plak1, R.id.plak2, R.id.plak3, R.id.plak4, R.id.plak5, R.id.plak6)
+    private val buttonArray = intArrayOf(R.id.plak1, R.id.plak2, R.id.plak3, R.id.plak4, R.id.plak5, R.id.plak6)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -18,8 +19,6 @@ class MainActivity : AppCompatActivity() {
 
         val draw = findViewById<TextView>(R.id.new_draw)
         draw.performClick()
-
-
     }
 
     fun initiateNumbers(v: View){
@@ -35,4 +34,9 @@ class MainActivity : AppCompatActivity() {
             }
         }
     }
+
+    fun buttonUpdate(v: View){
+
+    }
+
 }
