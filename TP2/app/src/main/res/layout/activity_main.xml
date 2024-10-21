@@ -49,7 +49,6 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="100dp"
-        android:text="Button"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/new_draw" />
 
@@ -58,7 +57,6 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="100dp"
-        android:text="Button"
         app:layout_constraintStart_toEndOf="@+id/plak1"
         app:layout_constraintTop_toBottomOf="@+id/new_draw" />
 
@@ -67,7 +65,6 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="100dp"
-        android:text="Button"
         app:layout_constraintStart_toEndOf="@+id/plak2"
         app:layout_constraintTop_toBottomOf="@+id/button3" />
 
@@ -75,7 +72,6 @@
         android:id="@+id/plak4"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Button"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/plak1" />
 
@@ -83,7 +79,6 @@
         android:id="@+id/plak5"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Button"
         app:layout_constraintStart_toEndOf="@+id/plak4"
         app:layout_constraintTop_toBottomOf="@+id/plak2" />
 
@@ -91,7 +86,6 @@
         android:id="@+id/plak6"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Button"
         app:layout_constraintStart_toEndOf="@+id/plak5"
         app:layout_constraintTop_toBottomOf="@+id/plak3" />
 

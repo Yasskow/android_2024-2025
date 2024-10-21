@@ -22,7 +22,7 @@ class ElementPicker<T>(private val ourMap: Map<T, Int>) {
 }
 
 fun <T> Map<T, Int>.bagToList() : List<T>{
-    var tmpList = mutableListOf<T>()
+    val tmpList = mutableListOf<T>()
     this.forEach{ p -> repeat(p.value){
         tmpList.add(p.key)
     }
