@@ -6,6 +6,7 @@ import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -32,11 +33,16 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import fr.uge.colorflags.model.ColoredPath
 import fr.uge.colorflags.model.Country
+import fr.uge.colorflags.model.Sketch
 import fr.uge.colorflags.ui.theme.ColorFlagsTheme
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -55,6 +61,15 @@ class MainActivity : ComponentActivity() {
                     color = MaterialTheme.colorScheme.background
                 ) {
                     CountryGalleryRoot()
+
+                    var sketch = Sketch.createEmpty() // create an empty sketch
+                    sketch += Color.Black // we create a new path with the color black
+                    sketch += Offset(2f, 7f) // we create a first point x=2 y=7
+                    sketch += Offset(3f, 9f) // we create a second point: a new segment connects (2,7) to (3,9)
+                    sketch += Offset(7f, 11f) // we create a third point and a new segment from (3,9) to (7,11)
+                    sketch += Color.Blue
+
+                    Drawer(sketch)
                 }
             }
         }
@@ -155,4 +170,36 @@ fun CountryCard(country: Country) {
             }
         }
     }
+}
+
+@Composable
+fun Drawer(sketch: Sketch, modifier: Modifier = Modifier) {
+    Canvas(modifier = modifier.fillMaxSize()) {
+        sketch.paths.forEach { coloredPath ->
+            for (i in 1 until coloredPath.size) {
+                val start = coloredPath[i - 1]
+                val end = coloredPath[i]
+                Log.i("TEST", "Drawing line from ($start) to ($end)")
+                drawLine(
+                    color = coloredPath.color,
+                    start = coloredPath[i - 1],
+                    end = coloredPath[i],
+                    strokeWidth = 10f
+                )
+            }
+        }
+    }
+}
+
+
+@Preview
+@Composable
+fun PreviewDrawer() {
+    var sketch = Sketch.createEmpty() // create an empty sketch
+    sketch += Color.Black // we create a new path with the color black
+    sketch += Offset(2f, 7f) // we create a first point x=2 y=7
+    sketch += Offset(3f, 9f) // we create a second point: a new segment connects (2,7) to (3,9)
+    sketch += Offset(7f, 11f)
+
+    Drawer(sketch = sketch, modifier = Modifier.fillMaxSize().background(Color.White))
 }
