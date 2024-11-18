@@ -9,6 +9,7 @@ import androidx.activity.compose.setContent
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -35,11 +36,16 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.view.DragStartHelper.OnDragStartListener
 import fr.uge.colorflags.model.ColoredPath
 import fr.uge.colorflags.model.Country
 import fr.uge.colorflags.model.Sketch
@@ -60,16 +66,10 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    CountryGalleryRoot()
-
-                    var sketch = Sketch.createEmpty() // create an empty sketch
-                    sketch += Color.Black // we create a new path with the color black
-                    sketch += Offset(2f, 7f) // we create a first point x=2 y=7
-                    sketch += Offset(3f, 9f) // we create a second point: a new segment connects (2,7) to (3,9)
-                    sketch += Offset(7f, 11f) // we create a third point and a new segment from (3,9) to (7,11)
-                    sketch += Color.Blue
-
-                    Drawer(sketch)
+                    //CountryGalleryRoot()
+                    PointerCapturer(onNewPointerPosition = {offset, b ->  Log.d("new Offset",
+                        "$offset | $b"
+                    )})
                 }
             }
         }
@@ -123,7 +123,7 @@ fun FlagDisplayer(country: Country, modifier: Modifier = Modifier){
 
     LaunchedEffect(country.code) {
         bitmap = withContext(Dispatchers.IO) {
-            loadBitmap("http://localhost:8081/flags/${country.code}.png")
+            loadBitmap("http://localhost:8081/flags/${country.code.lowercase()}.png")
         }
     }
 
@@ -172,14 +172,61 @@ fun CountryCard(country: Country) {
     }
 }
 
+fun Offset.coerceInBounds(size: IntSize): Offset {
+    val x = x.coerceIn(0f, size.width.toFloat() - 1)
+    val y = y.coerceIn(0f, size.height.toFloat() - 1)
+    return Offset(x, y)
+}
+
+
+@Composable fun PointerCapturer(modifier: Modifier = Modifier, onNewPointerPosition: (Offset, Boolean) -> Unit){
+    var componentSize by remember { mutableStateOf(IntSize.Zero) }
+    Box(modifier.onSizeChanged { componentSize = it }.pointerInput(Unit){
+        awaitPointerEventScope {
+
+            var isPressed = true
+            while (true) {
+                val event = awaitPointerEvent()
+                event.changes.forEach { pointerChange ->
+                    val position = pointerChange.position
+                    val boundedPosition = Offset(
+                        x = position.x.coerceIn(0f, componentSize.width.toFloat()),
+                        y = position.y.coerceIn(0f, componentSize.height.toFloat())
+                    )
+                    val newIsPressed = !pointerChange.pressed
+                    onNewPointerPosition(boundedPosition, isPressed)
+                    isPressed = newIsPressed
+                }
+            }
+        }
+    })
+}
+
+@Composable
+fun ActiveDrawer(color: Color, modifier: Modifier = Modifier){
+    var sketch by remember { mutableStateOf(Sketch.createEmpty().plus(color)) }
+
+    Box(modifier){
+        Drawer(sketch = sketch, modifier = Modifier.fillMaxSize())
+        PointerCapturer(modifier = Modifier.fillMaxSize(),
+            onNewPointerPosition = {pos, bool ->
+                sketch += pos
+                Log.d("POSITION", "POS  + $pos +  |  $bool")
+            }
+            )
+    }
+}
+
+@Composable
+fun Palette(image: ImageBitmap, modifier: Modifier = Modifier, onSelectedColor: (Color) -> Unit){
+
+}
+
 @Composable
 fun Drawer(sketch: Sketch, modifier: Modifier = Modifier) {
     Canvas(modifier = modifier.fillMaxSize()) {
         sketch.paths.forEach { coloredPath ->
             for (i in 1 until coloredPath.size) {
-                val start = coloredPath[i - 1]
-                val end = coloredPath[i]
-                Log.i("TEST", "Drawing line from ($start) to ($end)")
                 drawLine(
                     color = coloredPath.color,
                     start = coloredPath[i - 1],
@@ -191,15 +238,22 @@ fun Drawer(sketch: Sketch, modifier: Modifier = Modifier) {
     }
 }
 
-
 @Preview
 @Composable
 fun PreviewDrawer() {
-    var sketch = Sketch.createEmpty() // create an empty sketch
-    sketch += Color.Black // we create a new path with the color black
-    sketch += Offset(2f, 7f) // we create a first point x=2 y=7
-    sketch += Offset(3f, 9f) // we create a second point: a new segment connects (2,7) to (3,9)
-    sketch += Offset(7f, 11f)
+    var sketch = Sketch.createEmpty()
+    sketch += Color.Black
+    sketch += Offset(200f, 700f)
+    sketch += Offset(300f, 900f)
+    sketch += Offset(700f, 1100f)
 
-    Drawer(sketch = sketch, modifier = Modifier.fillMaxSize().background(Color.White))
+    Drawer(sketch = sketch, modifier = Modifier
+        .fillMaxSize()
+        .background(Color.White))
+}
+
+@Preview
+@Composable
+fun example(){
+    ActiveDrawer(Color.Red, modifier = Modifier.fillMaxSize())
 }
