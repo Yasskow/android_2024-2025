@@ -1,37 +1,37 @@
 package fr.uge.moneymachine
 
 import android.os.Bundle
-import android.widget.Button
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import fr.uge.moneymachine.ui.theme.MoneyMachineTheme
+import kotlinx.coroutines.delay
 import kotlin.random.Random
 
 val SYMBOLS = arrayOf("🎲", "🏦", "🍒", "🍓", "💰", "🏇", "🥹")
@@ -123,4 +123,73 @@ fun SlotMachinePreview(){
             Text("$tmp", Modifier.align(Alignment.CenterHorizontally))
         }
     }
+}
+
+@Composable
+fun VerticalGauge(fillRatio: Float, modifier: Modifier = Modifier){
+    Column(modifier.border(10.dp, Color.Black).fillMaxSize()) {
+        Row(Modifier.background(Color.White).weight(1.01f-fillRatio).fillMaxSize()) {
+
+        }
+        Row(Modifier.background(Color.Blue).weight(fillRatio).fillMaxSize()) {
+
+        }
+    }
+}
+
+@Composable
+fun Handle(onReleasedHandle: (Float) -> Unit, modifier: Modifier = Modifier){
+    var fill by remember { mutableFloatStateOf(0.01f)}
+    var isPressed by remember { mutableStateOf(false) }
+
+    LaunchedEffect(isPressed) {
+        while(isPressed){
+            fill = (fill + 0.01f).coerceIn(0f, 1f)
+            delay(16L)
+        }
+    }
+
+    Column(modifier.pointerInput(Unit){
+        detectTapGestures (
+            onPress = {
+                isPressed = true
+                try{
+                    awaitRelease()
+                }finally {
+                    onReleasedHandle.invoke(fill)
+                    fill = 0.01f
+                    isPressed = false
+                }
+            }
+        )
+    }) {
+        VerticalGauge(fill, modifier)
+    }
+}
+
+@Composable
+fun SlotMachineWithHandle(symbols: Array<String>, fontSize: TextUnit, rollNumber: Int, onDraw: (List<String>) -> Unit){
+    var isRunning by remember { mutableStateOf(false) }
+    var fillRatio by remember { mutableFloatStateOf(0f) }
+
+    LaunchedEffect(isRunning) {
+        delay(fillRatio.toLong()*5000)
+        isRunning = false
+    }
+
+    Row(Modifier.fillMaxSize()) {
+        Row(Modifier.fillMaxSize().weight(rollNumber.toFloat())) {
+            SlotMachine(symbols, fontSize, rollNumber, isRunning, onDraw)
+        }
+        Row(Modifier.fillMaxSize().weight(1f)) {
+            Handle({t -> fillRatio = t
+                         isRunning = true})
+        }
+    }
+}
+
+@Preview
+@Composable
+fun HandlePreview(){
+    SlotMachineWithHandle(SYMBOLS, 20.sp, 7) { }
 }
